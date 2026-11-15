@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power Fit Studio - Progreso</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #ffffff; display: flex; min-height: 100vh; }
+    .sidebar { width: 220px; background-color: #111111; padding: 20px 15px; border-right: 1px solid #222; position: fixed; height: 100vh; overflow-y: auto; }
+    .sidebar .logo { text-align: center; margin-bottom: 30px; }
+    .sidebar .logo h1 { font-size: 1.4rem; color: #ffffff; font-weight: 800; }
+    .sidebar .logo h1 span { color: #ff1493; display: block; font-size: 1.6rem; }
+    .sidebar nav a { display: flex; align-items: center; gap: 10px; padding: 12px 15px; color: #aaaaaa; text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 0.95rem; transition: all 0.3s; }
+    .sidebar nav a:hover { background-color: #1a1a1a; color: #ffffff; }
+    .sidebar nav a.active { background-color: #ff1493; color: #ffffff; font-weight: 600; }
+    .sidebar nav a .icon { font-size: 1.1rem; }
+    .main-content { margin-left: 220px; flex: 1; padding: 30px 40px; }
+    .main-content h2 { font-size: 1.5rem; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+    .buscador { background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; padding: 25px; max-width: 600px; margin-bottom: 30px; }
+    .buscador label { display: block; color: #aaa; margin-bottom: 10px; font-size: 0.9rem; }
+    .buscador input { width: 100%; padding: 12px 14px; background: #1e1e1e; border: 1px solid #333; border-radius: 8px; color: #fff; font-size: 1rem; }
+    .buscador input:focus { outline: none; border-color: #ff1493; }
+    .buscador button { margin-top: 12px; padding: 10px 20px; background: #ff1493; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .stat-card { background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px; }
+    .stat-card .label { color: #888; font-size: 0.85rem; margin-bottom: 8px; }
+    .stat-card .value { font-size: 1.8rem; font-weight: 700; color: #ff1493; }
+    .stat-card .value.green { color: #00c853; }
+    .info-card { background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; padding: 25px; margin-bottom: 20px; }
+    .info-card h3 { color: #ff1493; margin-bottom: 15px; font-size: 1.1rem; border-bottom: 1px solid #2a2a2a; padding-bottom: 10px; }
+    .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222; font-size: 0.95rem; }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .label { color: #aaa; }
+    .info-row .value { color: #fff; font-weight: 600; }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-active { background: rgba(0,200,83,0.15); color: #00c853; }
+    .badge-inactive { background: rgba(255,82,82,0.15); color: #ff5252; }
+    .empty-state { text-align: center; padding: 40px; color: #888; }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 10px; }
+    .tabla-ventas { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .tabla-ventas th { background: #1e1e1e; padding: 10px; text-align: left; font-size: 0.8rem; color: #888; text-transform: uppercase; }
+    .tabla-ventas td { padding: 10px; border-top: 1px solid #222; font-size: 0.9rem; }
+    @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 20px; } }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo"><h1>POWER FIT <span>STUDIO</span></h1></div>
+    <nav>
+      <a href="inicio.html"><span class="icon">🏠</span> Inicio</a>
+      <a href="registro.html"><span class="icon">👤</span> Registro Clientes</a>
+      <a href="rutinas.html"><span class="icon">💪</span> Rutinas</a>
+      <a href="tienda.html"><span class="icon">🛍️</span> Tienda</a>
+      <a href="planes.html"><span class="icon">👑</span> Planes</a>
+      <a href="progreso.html" class="active"><span class="icon">📈</span> Progreso</a>
+      <a href="contacto.html"><span class="icon">✉️</span> Contacto</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <h2>📈 Progreso del Cliente</h2>
+
+    <div class="buscador">
+      <label>Buscá un cliente por DNI para ver su progreso</label>
+      <input type="text" id="buscarDni" placeholder="Ej: 35123456">
+      <button onclick="buscarCliente()">🔍 Buscar</button>
+    </div>
+
+    <div id="resultado"></div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://kglgnogmbedvkoyrvmvk.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_JJhcTSJpTWSodyqVQXrwuA_jtf_0EmK';
+
+    const nombresPlanes = { 1: 'Básico', 2: 'Premium', 3: 'Elite' };
+    const nombresRutinas = { 1: 'Principiante Full Body', 2: 'Intermedia Push/Pull', 3: 'Avanzada Bro Split', 4: 'HIIT Cardio', 5: 'Yoga & Flexibilidad' };
+
+    async function buscarCliente() {
+      var dni = document.getElementById('buscarDni').value.trim();
+      if (!dni) { alert('Ingresá un DNI'); return; }
+
+      try {
+        var res = await fetch(SUPABASE_URL + '/rest/v1/clientes?dni=eq.' + dni, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        var clientes = await res.json();
+        if (clientes.length === 0) {
+          document.getElementById('resultado').innerHTML = '<div class="info-card"><div class="empty-state"><div class="icon">😕</div><p>No se encontró ningún cliente con ese DNI</p></div></div>';
+          return;
+        }
+
+        var c = clientes[0];
+        var idCliente = c.id_cliente;
+
+        var inscRes = await fetch(SUPABASE_URL + '/rest/v1/inscripciones?id_cliente=eq.' + idCliente + '&order=fecha_inicio.desc', {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        var inscripciones = await inscRes.json();
+
+        var ventasRes = await fetch(SUPABASE_URL + '/rest/v1/ventas?id_cliente=eq.' + idCliente + '&order=fecha_venta.desc', {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        var ventas = await ventasRes.json();
+
+        var inscripcionActiva = null;
+        for (var i = 0; i < inscripciones.length; i++) {
+          if (inscripciones[i].estado === 'ACTIVA') { inscripcionActiva = inscripciones[i]; break; }
+        }
+
+        var totalGastado = 0;
+        for (var i = 0; i < ventas.length; i++) totalGastado += (ventas[i].total || 0);
+
+        var html = '';
+
+        html += '<div class="stats-grid">';
+        html += '<div class="stat-card"><div class="label">Cliente</div><div class="value">' + c.nombre + ' ' + c.apellido + '</div></div>';
+        html += '<div class="stat-card"><div class="label">Plan Actual</div><div class="value green">' + (inscripcionActiva ? nombresPlanes[inscripcionActiva.id_plan] || 'Plan ' + inscripcionActiva.id_plan : 'Sin plan') + '</div></div>';
+        html += '<div class="stat-card"><div class="label">Inscripciones</div><div class="value">' + inscripciones.length + '</div></div>';
+        html += '<div class="stat-card"><div class="label">Total Gastado</div><div class="value green">$' + totalGastado.toLocaleString() + '</div></div>';
+        html += '</div>';
+
+        html += '<div class="info-card"><h3>👤 Datos Personales</h3>';
+        html += '<div class="info-row"><span class="label">Nombre</span><span class="value">' + c.nombre + ' ' + c.apellido + '</span></div>';
+        html += '<div class="info-row"><span class="label">DNI</span><span class="value">*****</span></div>';
+        html += '<div class="info-row"><span class="label">Teléfono</span><span class="value">*****</span></div>';
+        html += '<div class="info-row"><span class="label">Objetivo</span><span class="value">' + (c.objetivo || '-') + '</span></div>';
+        html += '<div class="info-row"><span class="label">Rutina</span><span class="value">' + (nombresRutinas[c.id_rutina] || '-') + '</span></div>';
+        html += '<div class="info-row"><span class="label">Fecha de Registro</span><span class="value">' + (c.fecha_registro ? new Date(c.fecha_registro).toLocaleDateString('es-AR') : '-') + '</span></div>';
+        html += '</div>';
+
+        if (inscripcionActiva) {
+          html += '<div class="info-card"><h3>👑 Membresía Activa</h3>';
+          html += '<div class="info-row"><span class="label">Plan</span><span class="value">' + (nombresPlanes[inscripcionActiva.id_plan] || 'Plan ' + inscripcionActiva.id_plan) + '</span></div>';
+          html += '<div class="info-row"><span class="label">Inicio</span><span class="value">' + new Date(inscripcionActiva.fecha_inicio).toLocaleDateString('es-AR') + '</span></div>';
+          html += '<div class="info-row"><span class="label">Fin</span><span class="value">' + new Date(inscripcionActiva.fecha_fin).toLocaleDateString('es-AR') + '</span></div>';
+          html += '<div class="info-row"><span class="label">Estado</span><span class="value"><span class="badge badge-active">' + inscripcionActiva.estado + '</span></span></div>';
+          html += '</div>';
+        }
+
+        if (inscripciones.length > 0) {
+          html += '<div class="info-card"><h3>📋 Historial de Inscripciones</h3>';
+          html += '<table class="tabla-ventas"><thead><tr><th>Plan</th><th>Inicio</th><th>Fin</th><th>Estado</th></tr></thead><tbody>';
+          for (var i = 0; i < inscripciones.length; i++) {
+            var insc = inscripciones[i];
+            var badgeClass = insc.estado === 'ACTIVA' ? 'badge-active' : 'badge-inactive';
+            html += '<tr>' +
+              '<td>' + (nombresPlanes[insc.id_plan] || 'Plan ' + insc.id_plan) + '</td>' +
+              '<td>' + new Date(insc.fecha_inicio).toLocaleDateString('es-AR') + '</td>' +
+              '<td>' + new Date(insc.fecha_fin).toLocaleDateString('es-AR') + '</td>' +
+              '<td><span class="badge ' + badgeClass + '">' + insc.estado + '</span></td>' +
+              '</tr>';
+          }
+          html += '</tbody></table></div>';
+        }
+
+        if (ventas.length > 0) {
+          html += '<div class="info-card"><h3>🛍️ Historial de Compras</h3>';
+          html += '<table class="tabla-ventas"><thead><tr><th>Fecha</th><th>Total</th><th>Método</th><th>Estado</th></tr></thead><tbody>';
+          for (var i = 0; i < ventas.length; i++) {
+            var v = ventas[i];
+            html += '<tr>' +
+              '<td>' + new Date(v.fecha_venta).toLocaleDateString('es-AR') + '</td>' +
+              '<td>$' + (v.total || 0).toLocaleString() + '</td>' +
+              '<td>' + (v.metodo_pago || '-') + '</td>' +
+              '<td><span class="badge badge-active">' + (v.estado || '-') + '</span></td>' +
+              '</tr>';
+          }
+          html += '</tbody></table></div>';
+        }
+
+        document.getElementById('resultado').innerHTML = html;
+
+      } catch (e) {
+        console.error(e);
+        document.getElementById('resultado').innerHTML = '<div class="info-card"><p style="color:#ff5252;">Error al buscar el cliente</p></div>';
+      }
+    }
+  </script>
+</body>
+</html>

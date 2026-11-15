@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Fit Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #0a0a0a;
+            color: white;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+            padding: 30px 20px;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            border-right: 1px solid #2a2a2a;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo h1 { font-size: 26px; font-weight: 900; color: white; line-height: 1; }
+        .logo h1 span { color: #ff1493; display: block; font-size: 30px; }
+        .logo-icon { font-size: 40px; margin-bottom: 10px; }
+
+        .nav-menu { list-style: none; flex: 1; }
+        .nav-menu li { margin-bottom: 5px; }
+        .nav-menu a {
+            display: flex; align-items: center; gap: 12px;
+            color: #aaa; text-decoration: none;
+            padding: 12px 15px; border-radius: 8px;
+            font-size: 15px; font-weight: 600;
+            transition: all 0.3s; cursor: pointer;
+        }
+        .nav-menu a:hover, .nav-menu a.active { background: #ff1493; color: white; }
+
+        .frase-decorativa {
+            font-family: 'Dancing Script', cursive;
+            color: #ff1493; font-size: 24px; line-height: 1.3;
+            text-align: center; margin-top: 20px;
+        }
+
+        .main-content { margin-left: 220px; flex: 1; padding: 20px 30px; }
+
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .search-bar {
+            background: #1a1a1a; border: 1px solid #333; border-radius: 25px;
+            padding: 12px 20px; color: white; width: 400px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .search-bar input { background: transparent; border: none; color: white; outline: none; width: 100%; font-size: 14px; }
+        .header-icons { display: flex; gap: 15px; align-items: center; }
+        .icon-btn {
+            background: #1a1a1a; border: none; color: white;
+            width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 18px; position: relative;
+        }
+        .icon-btn .badge {
+            position: absolute; top: -2px; right: -2px;
+            background: #ff1493; color: white; font-size: 10px;
+            width: 18px; height: 18px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .profile-pic {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: #ff1493; display: flex; align-items: center;
+            justify-content: center; font-weight: bold; cursor: pointer;
+        }
+
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 300px; gap: 25px; }
+        .left-column { display: flex; flex-direction: column; gap: 25px; }
+        .right-column { display: flex; flex-direction: column; gap: 25px; }
+
+        .hero-banner {
+            border-radius: 20px; overflow: hidden; position: relative;
+            min-height: 280px; display: flex; align-items: center;
+            background: linear-gradient(90deg, #ff1493 0%, #ff1493 45%, transparent 45%),
+                        url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80') center/cover no-repeat;
+        }
+        .hero-banner-content { padding: 40px; position: relative; z-index: 2; width: 45%; }
+        .hero-banner h2 { font-size: 52px; font-weight: 900; line-height: 1; margin-bottom: 15px; color: white; }
+        .hero-banner h2 span { color: #ff69b4; font-style: italic; display: block; }
+        .hero-banner p { font-size: 18px; margin-bottom: 25px; color: white; }
+        .btn-comenzar {
+            background: white; color: #ff1493; border: none;
+            padding: 14px 30px; border-radius: 25px; font-weight: 700;
+            font-size: 16px; cursor: pointer; transition: transform 0.3s;
+        }
+        .btn-comenzar:hover { transform: scale(1.05); }
+
+        .section-title { font-size: 22px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+
+        .servicios-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .servicio-card {
+            background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 15px;
+            padding: 25px 15px; text-align: center; transition: all 0.3s;
+            cursor: pointer;
+        }
+        .servicio-card:hover { border-color: #ff1493; transform: translateY(-3px); }
+        .servicio-card .servicio-icon { font-size: 40px; margin-bottom: 12px; }
+        .servicio-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+        .servicio-card p { font-size: 12px; color: #888; }
+
+        .tienda-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-ver-mas {
+            background: #ff1493; color: white; border: none;
+            padding: 8px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 13px;
+        }
+
+        .productos-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .producto-card {
+            background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 15px;
+            overflow: hidden; transition: all 0.3s;
+        }
+        .producto-card:hover { border-color: #ff1493; transform: translateY(-3px); }
+        .producto-img {
+            height: 150px; background: #2a2a2a;
+            display: flex; align-items: center; justify-content: center; font-size: 60px;
+        }
+        .producto-info { padding: 15px; }
+        .producto-info h4 { font-size: 14px; margin-bottom: 8px; }
+        .producto-info .precio { color: #ff1493; font-weight: 700; font-size: 16px; }
+
+        .planes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .plan-card {
+            background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 15px;
+            padding: 25px; text-align: center; transition: all 0.3s;
+        }
+        .plan-card:hover { border-color: #ff1493; transform: translateY(-3px); }
+        .plan-card h3 { color: #ff1493; font-size: 20px; margin-bottom: 10px; }
+        .plan-card .precio { font-size: 28px; font-weight: 900; margin: 15px 0; }
+        .plan-card p { color: #888; font-size: 13px; margin-bottom: 8px; }
+        .btn-plan {
+            background: #ff1493; color: white; border: none;
+            padding: 10px 25px; border-radius: 20px; font-weight: 600;
+            cursor: pointer; margin-top: 15px; font-size: 13px;
+        }
+        .btn-plan:hover { background: #e6007e; }
+
+        .panel-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 15px; padding: 20px; }
+        .panel-card h3 { font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .semana-lista { list-style: none; }
+        .semana-lista li {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid #2a2a2a; font-size: 13px;
+        }
+        .semana-lista li:last-child { border-bottom: none; }
+        .semana-lista .dia { font-weight: 700; width: 40px; }
+        .semana-lista .ejercicio { flex: 1; color: #ccc; }
+        .semana-lista .check { color: #ff1493; font-size: 16px; }
+        .semana-lista .check.inactivo { color: #555; }
+        .btn-planificacion {
+            background: #ff1493; color: white; border: none;
+            padding: 12px; border-radius: 25px; font-weight: 700;
+            cursor: pointer; width: 100%; margin-top: 15px; font-size: 13px;
+        }
+
+        .progreso-container { display: flex; align-items: center; gap: 20px; }
+        .circulo-progreso {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: conic-gradient(#ff1493 0% 75%, #2a2a2a 75% 100%);
+            display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .circulo-progreso::before {
+            content: ''; width: 80px; height: 80px;
+            background: #1a1a1a; border-radius: 50%; position: absolute;
+        }
+        .circulo-progreso span { position: relative; z-index: 1; font-size: 24px; font-weight: 900; }
+        .progreso-info { flex: 1; }
+        .progreso-info p { font-size: 12px; color: #888; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        .progreso-info p .check { color: #ff1493; }
+
+        .btn-flotante {
+            background: #ff1493; color: white; border: none;
+            padding: 15px 20px; border-radius: 15px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center;
+            justify-content: space-between; font-size: 14px; width: 100%;
+        }
+        .btn-flotante .arrow {
+            background: white; color: #ff1493; width: 30px; height: 30px;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+
+        .rutinas-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .rutina-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 15px; padding: 20px; }
+        .rutina-card h4 { color: #ff1493; margin-bottom: 10px; }
+
+        .seccion { display: none; }
+        .seccion.activa { display: block; }
+
+        .perfil-container {
+            background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 15px;
+            padding: 30px; display: flex; gap: 30px; align-items: center;
+        }
+        .perfil-foto {
+            width: 120px; height: 120px; border-radius: 50%;
+            background: #ff1493; display: flex; align-items: center;
+            justify-content: center; font-size: 50px; font-weight: 900; flex-shrink: 0;
+        }
+        .perfil-info h3 { font-size: 24px; margin-bottom: 10px; }
+        .perfil-info p { color: #aaa; margin-bottom: 8px; font-size: 14px; }
+        .perfil-info strong { color: white; }
+
+        .contacto-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .contacto-info {
+            background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 15px; padding: 25px;
+        }
+        .contacto-info h3 { color: #ff1493; margin: 15px 0 8px; font-size: 16px; }
+        .contacto-info h3:first-child { margin-top: 0; }
+        .contacto-info p { color: #ccc; font-size: 14px; margin-bottom: 5px; }
+        .contacto-form {
+            background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 15px;
+            padding: 25px; display: flex; flex-direction: column; gap: 12px;
+        }
+        .contacto-form h3 { color: #ff1493; margin-bottom: 10px; }
+        .contacto-form input, .contacto-form textarea {
+            background: #0a0a0a; border: 1px solid #333; border-radius: 8px;
+            padding: 12px; color: white; font-family: inherit; font-size: 14px; outline: none;
+        }
+        .contacto-form input:focus, .contacto-form textarea:focus { border-color: #ff1493; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.7);
+            z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal.activo { display: flex; }
+        .modal-content {
+            background: #1a1a1a; border: 1px solid #ff1493; border-radius: 15px;
+            padding: 30px; max-width: 500px; width: 90%; position: relative;
+            max-height: 80vh; overflow-y: auto;
+        }
+        .modal-content h3 { color: #ff1493; margin-bottom: 15px; font-size: 20px; }
+        .modal-content p { color: #ccc; margin-bottom: 10px; font-size: 14px; }
+        .modal-cerrar {
+            position: absolute; top: 10px; right: 15px;
+            font-size: 24px; color: #888; cursor: pointer;
+            background: none; border: none;
+        }
+        .modal-cerrar:hover { color: #ff1493; }
+
+        .notificacion {
+            background: #0a0a0a; border-left: 3px solid #ff1493;
+            padding: 12px; margin-bottom: 10px; border-radius: 5px;
+        }
+        .notificacion p { margin-bottom: 5px; }
+        .notificacion small { color: #666; font-size: 11px; }
+
+        .perfil-modal-header { text-align: center; margin-bottom: 20px; }
+        .perfil-foto-grande {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: #ff1493; display: flex; align-items: center;
+            justify-content: center; font-size: 35px; font-weight: 900;
+            margin: 0 auto 10px;
+        }
+
+        #form-inscripcion { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        #form-inscripcion input {
+            background: #0a0a0a; border: 1px solid #333; border-radius: 8px;
+            padding: 12px; color: white; font-family: inherit; font-size: 14px; outline: none;
+        }
+        #form-inscripcion input:focus { border-color: #ff1493; }
+
+        .mensaje-exito {
+            position: fixed; top: 20px; right: 20px;
+            background: #ff1493; color: white; padding: 15px 25px;
+            border-radius: 10px; display: none; align-items: center; gap: 10px;
+            font-weight: 600; z-index: 2000;
+            box-shadow: 0 4px 15px rgba(255,20,147,0.4);
+        }
+        .mensaje-exito.activo { display: flex; animation: slideIn 0.3s ease; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">🏋️</div>
+            <h1>POWER FIT<span>STUDIO</span></h1>
+        </div>
+        <ul class="nav-menu">
+            <li><a href="#" class="active" data-seccion="inicio">🏠 Inicio</a></li>
+            <li><a href="#" data-seccion="perfil">👤 Mi Perfil</a></li>
+            <li><a href="#" data-seccion="rutinas">💪 Rutinas</a></li>
+            <li><a href="#" data-seccion="tienda">🛍️ Tienda</a></li>
+            <li><a href="#" data-seccion="planes">👑 Planes</a></li>
+            <li><a href="#" data-seccion="progreso">📈 Progreso</a></li>
+            <li><a href="#" data-seccion="contacto">✉️ Contacto</a></li>
+        </ul>
+            </ul>
+
+    <!-- 🆕 Botón de registro (FUERA del menú, no lo bloquea el JS) -->
+    <div style="padding: 15px; margin-top: 10px; border-top: 1px solid #333;">
+      <a href="registro.html" style="color: #f5c518; text-decoration: none; font-weight: bold; font-size: 15px; display: block;">
+        📝 Registrar Cliente
+      </a>
+    </div>
+        <div class="frase-decorativa">Entrena.<br>Evoluciona.<br>Viste tu poder.</div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <div class="search-bar">
+                <span>🔍</span>
+                <input type="text" id="buscador" placeholder="Buscar rutinas, ropa o planes...">
+            </div>
+            <div class="header-icons">
+                <button class="icon-btn" id="btn-notificaciones">🔔<span class="badge">2</span></button>
+                <div class="profile-pic" id="btn-perfil">P</div>
+            </div>
+        </header>
+
+        <!-- INICIO -->
+        <div id="seccion-inicio" class="seccion activa">
+            <div class="dashboard-grid">
+                <div class="left-column">
+                    <div class="hero-banner">
+                        <div class="hero-banner-content">
+                            <h2>POWER FIT<br><span>STUDIO</span></h2>
+                            <p>Entrena. Evoluciona. Viste tu poder.</p>
+                            <button class="btn-comenzar" id="btn-comenzar">Comenzar ahora →</button>
+                        </div>
+                    </div>
+
+                    <h3 class="section-title">⭐ Nuestros servicios</h3>
+                    <div class="servicios-grid">
+                        <div class="servicio-card" data-ir-a="inicio">
+                            <div class="servicio-icon">🏋️</div>
+                            <h4>Gimnasio</h4>
+                            <p>Entrená en un espacio moderno y equipado</p>
+                        </div>
+                        <div class="servicio-card" data-ir-a="rutinas">
+                            <div class="servicio-icon">📋</div>
+                            <h4>Rutinas personalizadas</h4>
+                            <p>Adaptadas a tus objetivos</p>
+                        </div>
+                        <div class="servicio-card" data-ir-a="tienda">
+                            <div class="servicio-icon">👕</div>
+                            <h4>Indumentaria deportiva</h4>
+                            <p>Calidad y estilo</p>
+                        </div>
+                        <div class="servicio-card" data-ir-a="planes">
+                            <div class="servicio-icon">👑</div>
+                            <h4>Planes y membresías</h4>
+                            <p>Elegí el plan ideal para vos</p>
+                        </div>
+                    </div>
+
+                    <div class="tienda-header">
+                        <h3 class="section-title" style="margin:0">👕 Nuestra tienda</h3>
+                        <button class="btn-ver-mas" id="btn-ver-mas-tienda">Ver más →</button>
+                    </div>
+                    <div id="contenedor-productos" class="productos-grid"></div>
+                </div>
+
+                <div class="right-column">
+                    <div class="panel-card">
+                        <h3>📅 Tu entrenamiento de esta semana</h3>
+                        <ul class="semana-lista">
+                            <li><span class="dia">Lun</span><span class="ejercicio">Espalda y bíceps</span><span class="check">✓</span></li>
+                            <li><span class="dia">Mar</span><span class="ejercicio">Piernas y glúteos</span><span class="check">✓</span></li>
+                            <li><span class="dia">Mié</span><span class="ejercicio">Descanso</span><span class="check inactivo">○</span></li>
+                            <li><span class="dia">Jue</span><span class="ejercicio">Pecho y tríceps</span><span class="check">✓</span></li>
+                            <li><span class="dia">Vie</span><span class="ejercicio">Full body</span><span class="check inactivo">○</span></li>
+                            <li><span class="dia">Sáb</span><span class="ejercicio">Cardio</span><span class="check inactivo">○</span></li>
+                            <li><span class="dia">Dom</span><span class="ejercicio">Descanso</span><span class="check inactivo">○</span></li>
+                        </ul>
+                        <button class="btn-planificacion" id="btn-planificacion">Ver mi planificación →</button>
+                    </div>
+
+                    <div class="panel-card">
+                        <h3>📊 Tu progreso</h3>
+                        <div class="progreso-container">
+                            <div class="circulo-progreso"><span>75%</span></div>
+                            <div class="progreso-info">
+                                <p><span class="check">✓</span> Entrenamientos: 12</p>
+                                <p><span class="check">✓</span> Objetivo: Definición</p>
+                                <p><span class="check">✓</span> Tiempo activo: 3 semanas</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-flotante" id="btn-mejor-version">
+                        <span>🏋️ Tu mejor versión está más cerca</span>
+                        <span class="arrow">→</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLANES -->
+        <div id="seccion-planes" class="seccion">
+            <h2 class="section-title" id="titulo-planes">👑 Nuestros Planes</h2>
+            <div id="contenedor-planes" class="planes-grid"></div>
+        </div>
+
+        <!-- RUTINAS -->
+        <div id="seccion-rutinas" class="seccion">
+            <h2 class="section-title" id="titulo-rutinas">💪 Ejercicios Disponibles</h2>
+            <div id="contenedor-ejercicios" class="rutinas-grid"></div>
+        </div>
+
+        <!-- TIENDA -->
+        <div id="seccion-tienda" class="seccion">
+            <h2 class="section-title" id="titulo-tienda">🛍️ Tienda Completa</h2>
+            <div id="contenedor-productos-full" class="productos-grid"></div>
+        </div>
+
+        <!-- PROGRESO -->
+        <div id="seccion-progreso" class="seccion">
+            <h2 class="section-title">📈 Tu Progreso</h2>
+            <div class="panel-card">
+                <div class="progreso-container">
+                    <div class="circulo-progreso"><span>75%</span></div>
+                    <div class="progreso-info">
+                        <p><span class="check">✓</span> Entrenamientos: 12</p>
+                        <p><span class="check">✓</span> Objetivo: Definición</p>
+                        <p><span class="check">✓</span> Tiempo activo: 3 semanas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PERFIL -->
+        <div id="seccion-perfil" class="seccion">
+            <h2 class="section-title">👤 Mi Perfil</h2>
+            <div class="perfil-container">
+                <div class="perfil-foto">P</div>
+                <div class="perfil-info">
+                    <h3>Paula Mathieu</h3>
+                    <p>paula.mathieu@powerfit.com</p>
+                    <p>DNI: 35.123.456</p>
+                    <p>Tel: 11-2233-4455</p>
+                    <p><strong>Objetivo:</strong> Tonificación</p>
+                    <p><strong>Plan actual:</strong> Plan Premium</p>
+                    <p><strong>Miembro desde:</strong> Octubre 2026</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTACTO -->
+        <div id="seccion-contacto" class="seccion">
+            <h2 class="section-title">✉️ Contacto</h2>
+            <div class="contacto-container">
+                <div class="contacto-info">
+                    <h3>📍 Visitanos</h3>
+                    <p>Av. del Deporte 1234, Buenos Aires</p>
+                    <h3>📞 Teléfono</h3>
+                    <p>+54 11 2233-4455</p>
+                    <h3>📧 Email</h3>
+                    <p>info@powerfitstudio.com</p>
+                    <h3>🕐 Horarios</h3>
+                    <p>Lun a Vie: 7:00 - 22:00</p>
+                    <p>Sábados: 8:00 - 18:00</p>
+                </div>
+                <form class="contacto-form" id="form-contacto">
+                    <h3>Envianos un mensaje</h3>
+                    <input type="text" id="contacto-nombre" placeholder="Tu nombre" required>
+                    <input type="email" id="contacto-email" placeholder="Tu email" required>
+                    <textarea id="contacto-mensaje" placeholder="Tu mensaje" rows="4" required></textarea>
+                    <button type="submit" class="btn-plan">Enviar mensaje</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL NOTIFICACIONES -->
+    <div id="modal-notificaciones" class="modal">
+        <div class="modal-content">
+            <span class="modal-cerrar" data-modal="modal-notificaciones">✕</span>
+            <h3>🔔 Notificaciones</h3>
+            <div class="notificacion">
+                <p><strong>Nueva rutina disponible</strong></p>
+                <p>Tu rutina de piernas fue actualizada. ¡Mirala ahora!</p>
+                <small>Hace 2 horas</small>
+            </div>
+            <div class="notificacion">
+                <p><strong>Oferta especial</strong></p>
+                <p>20% de descuento en la tienda este fin de semana.</p>
+                <small>Hace 1 día</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PERFIL RÁPIDO -->
+    <div id="modal-perfil" class="modal">
+        <div class="modal-content">
+            <span class="modal-cerrar" data-modal="modal-perfil">✕</span>
+            <div class="perfil-modal-header">
+                <div class="perfil-foto-grande">P</div>
+                <h3>Paula Mathieu</h3>
+                <p>Plan Premium · Miembro desde Oct 2026</p>
+            </div>
+            <button class="btn-plan" onclick="irASeccion('perfil'); cerrarModal('modal-perfil');">Ver perfil completo</button>
+        </div>
+    </div>
+
+    <!-- MODAL PLANIFICACIÓN -->
+    <div id="modal-planificacion" class="modal">
+        <div class="modal-content">
+            <span class="modal-cerrar" data-modal="modal-planificacion">✕</span>
+            <h3>📅 Planificación Semanal</h3>
+            <p>Tu rutina de esta semana está armada según tu objetivo: <strong>Definición</strong></p>
+            <ul class="semana-lista">
+                <li><span class="dia">Lun</span><span class="ejercicio">Espalda y bíceps</span><span class="check">✓</span></li>
+                <li><span class="dia">Mar</span><span class="ejercicio">Piernas y glúteos</span><span class="check">✓</span></li>
+                <li><span class="dia">Mié</span><span class="ejercicio">Descanso</span><span class="check inactivo">○</span></li>
+                <li><span class="dia">Jue</span><span class="ejercicio">Pecho y tríceps</span><span class="check">✓</span></li>
+                <li><span class="dia">Vie</span><span class="ejercicio">Full body</span><span class="check inactivo">○</span></li>
+                <li><span class="dia">Sáb</span><span class="ejercicio">Cardio</span><span class="check inactivo">○</span></li>
+                <li><span class="dia">Dom</span><span class="ejercicio">Descanso</span><span class="check inactivo">○</span></li>
+            </ul>
+            <button class="btn-plan" onclick="cerrarModal('modal-planificacion'); irASeccion('rutinas');">Ver rutinas completas</button>
+        </div>
+    </div>
+
+    <!-- MODAL INSCRIPCIÓN -->
+    <div id="modal-inscripcion" class="modal">
+        <div class="modal-content">
+            <span class="modal-cerrar" data-modal="modal-inscripcion">✕</span>
+            <h3>👑 Inscripción al Plan</h3>
+            <p id="plan-seleccionado"></p>
+            <form id="form-inscripcion">
+                <input type="text" id="insc-nombre" placeholder="Nombre completo" required>
+                <input type="email" id="insc-email" placeholder="Email" required>
+                <input type="tel" id="insc-tel" placeholder="Teléfono" required>
+                <button type="submit" class="btn-plan">Confirmar inscripción</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL GENÉRICO -->
+    <div id="modal-generico" class="modal">
+        <div class="modal-content">
+            <span class="modal-cerrar" data-modal="modal-generico">✕</span>
+            <h3 id="modal-generico-titulo"></h3>
+            <p id="modal-generico-texto"></p>
+            <button class="btn-plan" id="modal-generico-btn">Continuar</button>
+        </div>
+    </div>
+
+    <!-- MENSAJE DE ÉXITO -->
+    <div id="mensaje-exito" class="mensaje-exito">
+        <span>✅</span>
+        <span id="mensaje-exito-texto"></span>
+    </div>
+
+    <script>
+        // ============================================
+        // DATOS
+        // ============================================
+        const productos = [
+            { nombre: 'Top Deportivo', precio: 25000, emoji: '👙' },
+            { nombre: 'Short Deportivo', precio: 22000, emoji: '🩳' },
+            { nombre: 'Buzo Fitness', precio: 45000, emoji: '🧥' },
+            { nombre: 'Calza Fit', precio: 35000, emoji: '👖' }
+        ];
+
+        const planes = [
+            { nombre: 'Plan Básico', precio: 15000, duracion: 1, descripcion: 'Acceso al gimnasio en horario completo' },
+            { nombre: 'Plan Premium', precio: 25000, duracion: 3, descripcion: 'Gimnasio + rutinas personalizadas' },
+            { nombre: 'Plan Full', precio: 40000, duracion: 6, descripcion: 'Todo incluido + nutrición + tienda' }
+        ];
+
+        const ejercicios = [
+            { nombre: 'Sentadilla', grupo: 'Piernas', descripcion: 'Ejercicio compuesto para cuádriceps y glúteos' },
+            { nombre: 'Press de banca', grupo: 'Pecho', descripcion: 'Ejercicio para pectorales y tríceps' },
+            { nombre: 'Dominadas', grupo: 'Espalda', descripcion: 'Trabajo de dorsales y bíceps' },
+            { nombre: 'Plancha', grupo: 'Core', descripcion: 'Fortalecimiento del abdomen' },
+            { nombre: 'Peso muerto', grupo: 'Espalda', descripcion: 'Ejercicio compuesto para toda la cadena posterior' }
+        ];
+
+        // ============================================
+        // SONIDO DE NOTIFICACIÓN
+        // ============================================
+        function reproducirSonido() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscilador = audioCtx.createOscillator();
+                const ganancia = audioCtx.createGain();
+                
+                oscilador.connect(ganancia);
+                ganancia.connect(audioCtx.destination);
+                
+                oscilador.frequency.value = 800;
+                oscilador.type = 'sine';
+                ganancia.gain.value = 0.3;
+                
+                oscilador.start();
+                setTimeout(() => { oscilador.frequency.value = 1000; }, 100);
+                setTimeout(() => { oscilador.stop(); }, 300);
+                
+                console.log('🔔 Sonido reproducido');
+            } catch (error) {
+                console.log('No se pudo reproducir el sonido');
+            }
+        }
+
+        // ============================================
+        // AL CARGAR LA PÁGINA
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ JavaScript cargado');
+
+            mostrarProductos(productos);
+            mostrarPlanes();
+            mostrarEjercicios();
+
+            // Menú lateral
+            document.querySelectorAll('.nav-menu a').forEach(function(boton) {
+                boton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    irASeccion(this.getAttribute('data-seccion'));
+                });
+            });
+
+            // Botones de servicios
+            document.querySelectorAll('.servicio-card').forEach(function(tarjeta) {
+                tarjeta.addEventListener('click', function() {
+                    const destino = this.getAttribute('data-ir-a');
+                    if (destino) {
+                        irASeccion(destino);
+                        console.log('🎯 Tarjeta servicio → ' + destino);
+                    }
+                });
+            });
+
+            // Botón Ver más tienda
+            const btnVerMas = document.getElementById('btn-ver-mas-tienda');
+            if (btnVerMas) btnVerMas.addEventListener('click', function() { irASeccion('tienda'); });
+
+            // Botón Comenzar ahora
+            const btnComenzar = document.getElementById('btn-comenzar');
+            if (btnComenzar) {
+                btnComenzar.addEventListener('click', function() {
+                    abrirModalGenerico('🚀 ¡Bienvenida a Power Fit Studio!', 'Elegí el plan que mejor se adapte a tus objetivos y comenzá tu transformación hoy mismo.', function() {
+                        cerrarModal('modal-generico');
+                        irASeccion('planes');
+                    });
+                });
+            }
+
+            // Botón Tu mejor versión
+            const btnMejor = document.getElementById('btn-mejor-version');
+            if (btnMejor) {
+                btnMejor.addEventListener('click', function() {
+                    abrirModalGenerico('💪 ¡Vos podés!', 'Cada entrenamiento te acerca más a tu objetivo. Seguimos juntos en este camino.', function() {
+                        cerrarModal('modal-generico');
+                        irASeccion('progreso');
+                    });
+                });
+            }
+
+            // Botón Planificación
+            const btnPlan = document.getElementById('btn-planificacion');
+            if (btnPlan) btnPlan.addEventListener('click', function() { abrirModal('modal-planificacion'); });
+
+            // Botón Notificaciones (CON SONIDO)
+            const btnNotif = document.getElementById('btn-notificaciones');
+            if (btnNotif) {
+                btnNotif.addEventListener('click', function() {
+                    reproducirSonido();
+                    abrirModal('modal-notificaciones');
+                });
+            }
+
+            // Botón Perfil
+            const btnPerfil = document.getElementById('btn-perfil');
+            if (btnPerfil) btnPerfil.addEventListener('click', function() { abrirModal('modal-perfil'); });
+
+            // Cerrar modales con X
+            document.querySelectorAll('.modal-cerrar').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    cerrarModal(this.getAttribute('data-modal'));
+                });
+            });
+
+            // Cerrar modal al hacer clic fuera
+            document.querySelectorAll('.modal').forEach(function(modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) cerrarModal(this.id);
+                });
+            });
+
+            // Formulario de inscripción
+            const formInsc = document.getElementById('form-inscripcion');
+            if (formInsc) {
+                formInsc.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const nombre = document.getElementById('insc-nombre').value;
+                    const plan = document.getElementById('plan-seleccionado').textContent;
+                    console.log('📝 Inscripción:', { nombre: nombre, plan: plan });
+                    cerrarModal('modal-inscripcion');
+                    mostrarExito('✅ ¡Inscripción confirmada! Bienvenida, ' + nombre);
+                    formInsc.reset();
+                });
+            }
+
+            // Formulario de contacto
+            const formCont = document.getElementById('form-contacto');
+            if (formCont) {
+                formCont.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const nombre = document.getElementById('contacto-nombre').value;
+                    console.log('📧 Mensaje de:', nombre);
+                    mostrarExito('✅ ¡Mensaje enviado! Te responderemos pronto, ' + nombre);
+                    formCont.reset();
+                });
+            }
+
+            // ============================================
+            // BUSCADOR INTELIGENTE
+            // ============================================
+            const buscador = document.getElementById('buscador');
+            if (buscador) {
+                buscador.addEventListener('input', function() {
+                    const texto = this.value.toLowerCase().trim();
+
+                    // Si está vacío, restaurar títulos originales
+                    if (texto === '') {
+                        document.getElementById('titulo-tienda').textContent = '🛍️ Tienda Completa';
+                        document.getElementById('titulo-rutinas').textContent = '💪 Ejercicios Disponibles';
+                        document.getElementById('titulo-planes').textContent = '👑 Nuestros Planes';
+                        mostrarProductos(productos);
+                        return;
+                    }
+
+                    const prodFilt = productos.filter(p => p.nombre.toLowerCase().includes(texto));
+                    const planFilt = planes.filter(p => p.nombre.toLowerCase().includes(texto) || p.descripcion.toLowerCase().includes(texto));
+                    const ejFilt = ejercicios.filter(e => e.nombre.toLowerCase().includes(texto) || e.grupo.toLowerCase().includes(texto));
+
+                    const total = prodFilt.length + planFilt.length + ejFilt.length;
+
+                    if (total === 0) {
+                        const html = '<p style="grid-column:1/-1; text-align:center; color:#888; padding:20px;">No se encontraron resultados para "' + texto + '"</p>';
+                        document.getElementById('contenedor-productos').innerHTML = html;
+                        document.getElementById('contenedor-productos-full').innerHTML = html;
+                        return;
+                    }
+
+                    // Determinar a qué sección ir según lo que encontró más
+                    let seccionDestino = 'tienda';
+                    let tituloSeccion = '🛍️ Tienda';
+
+                    if (ejFilt.length > 0 && ejFilt.length >= prodFilt.length && ejFilt.length >= planFilt.length) {
+                        seccionDestino = 'rutinas';
+                        tituloSeccion = '💪 Rutinas';
+                    } else if (planFilt.length > 0 && planFilt.length >= prodFilt.length) {
+                        seccionDestino = 'planes';
+                        tituloSeccion = '👑 Planes';
+                    } else if (prodFilt.length > 0) {
+                        seccionDestino = 'tienda';
+                        tituloSeccion = '🛍️ Tienda';
+                    }
+
+                    // Armar el HTML según la sección destino
+                    let html = '';
+                    const iconos = { 'Piernas': '🦵', 'Pecho': '💪', 'Espalda': '🔙', 'Core': '🎯' };
+
+                    if (seccionDestino === 'rutinas') {
+                        ejFilt.forEach(function(ej) {
+                            const icono = iconos[ej.grupo] || '💪';
+                            html += '<div class="rutina-card"><h4>' + icono + ' ' + ej.nombre + '</h4><p style="color:#888; font-size:13px;">' + ej.grupo + '</p><p style="font-size:13px;">' + ej.descripcion + '</p></div>';
+                        });
+                    } else if (seccionDestino === 'planes') {
+                        planFilt.forEach(function(plan) {
+                            html += '<div class="plan-card"><h3>' + plan.nombre + '</h3><p class="precio">$' + plan.precio.toLocaleString() + '</p><p>' + plan.descripcion + '</p><p><strong>Duración:</strong> ' + plan.duracion + ' meses</p></div>';
+                        });
+                    } else {
+                        prodFilt.forEach(function(prod) {
+                            html += '<div class="producto-card"><div class="producto-img">' + prod.emoji + '</div><div class="producto-info"><h4>' + prod.nombre + '</h4><p class="precio">$' + prod.precio.toLocaleString() + '</p></div></div>';
+                        });
+                    }
+
+                    // Cambiar el título de la sección destino
+                    const tituloDestino = document.getElementById('titulo-' + seccionDestino);
+                    if (tituloDestino) {
+                        tituloDestino.textContent = tituloSeccion + ' - Resultados para "' + texto + '"';
+                    }
+
+                    // Mostrar resultados en la sección correspondiente
+                    if (seccionDestino === 'rutinas') {
+                        document.getElementById('contenedor-ejercicios').innerHTML = html;
+                    } else if (seccionDestino === 'planes') {
+                        document.getElementById('contenedor-planes').innerHTML = html;
+                    } else {
+                        document.getElementById('contenedor-productos').innerHTML = html;
+                        document.getElementById('contenedor-productos-full').innerHTML = html;
+                    }
+
+                    irASeccion(seccionDestino);
+                    console.log('🔍 Búsqueda: "' + texto + '" → Sección: ' + seccionDestino);
+                });
+            }
+        });
+
+        // ============================================
+        // FUNCIONES
+        // ============================================
+        function irASeccion(nombre) {
+            document.querySelectorAll('.nav-menu a').forEach(b => b.classList.remove('active'));
+            const botonActivo = document.querySelector('.nav-menu a[data-seccion="' + nombre + '"]');
+            if (botonActivo) botonActivo.classList.add('active');
+
+            document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+            const seccion = document.getElementById('seccion-' + nombre);
+            if (seccion) {
+                seccion.classList.add('activa');
+                window.scrollTo(0, 0);
+                console.log('📍 Sección: ' + nombre);
+            }
+        }
+
+        function abrirModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.classList.add('activo');
+        }
+
+        function cerrarModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) modal.classList.remove('activo');
+        }
+
+        function abrirModalGenerico(titulo, texto, callback) {
+            document.getElementById('modal-generico-titulo').textContent = titulo;
+            document.getElementById('modal-generico-texto').textContent = texto;
+            const btn = document.getElementById('modal-generico-btn');
+            btn.onclick = function() { if (callback) callback(); };
+            abrirModal('modal-generico');
+        }
+
+        function abrirModalInscripcion(nombrePlan) {
+            document.getElementById('plan-seleccionado').textContent = 'Plan seleccionado: ' + nombrePlan;
+            abrirModal('modal-inscripcion');
+        }
+
+        function mostrarExito(texto) {
+            const mensaje = document.getElementById('mensaje-exito');
+            document.getElementById('mensaje-exito-texto').textContent = texto;
+            mensaje.classList.add('activo');
+            setTimeout(function() { mensaje.classList.remove('activo'); }, 3500);
+        }
+
+        function mostrarProductos(lista) {
+            const c1 = document.getElementById('contenedor-productos');
+            const c2 = document.getElementById('contenedor-productos-full');
+            let html = '';
+            lista.forEach(function(prod) {
+                html += '<div class="producto-card"><div class="producto-img">' + prod.emoji + '</div><div class="producto-info"><h4>' + prod.nombre + '</h4><p class="precio">$' + prod.precio.toLocaleString() + '</p></div></div>';
+            });
+            if (c1) c1.innerHTML = html;
+            if (c2) c2.innerHTML = html;
+        }
+
+        function mostrarPlanes() {
+            const cont = document.getElementById('contenedor-planes');
+            if (!cont) return;
+            let html = '';
+            planes.forEach(function(plan) {
+                html += '<div class="plan-card"><h3>' + plan.nombre + '</h3><p class="precio">$' + plan.precio.toLocaleString() + '</p><p>' + plan.descripcion + '</p><p><strong>Duración:</strong> ' + plan.duracion + ' meses</p><button class="btn-plan btn-inscribirme" data-plan="' + plan.nombre + '">Inscribirme</button></div>';
+            });
+            cont.innerHTML = html;
+            cont.querySelectorAll('.btn-inscribirme').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    abrirModalInscripcion(this.getAttribute('data-plan'));
+                });
+            });
+        }
+
+        function mostrarEjercicios() {
+            const cont = document.getElementById('contenedor-ejercicios');
+            if (!cont) return;
+            const iconos = { 'Piernas': '🦵', 'Pecho': '💪', 'Espalda': '🔙', 'Core': '🎯' };
+            let html = '';
+            ejercicios.forEach(function(ej) {
+                const icono = iconos[ej.grupo] || '💪';
+                html += '<div class="rutina-card"><h4>' + icono + ' ' + ej.nombre + '</h4><p style="color:#888; font-size:13px; margin-bottom:10px">' + ej.grupo + '</p><p style="font-size:13px">' + ej.descripcion + '</p></div>';
+            });
+            cont.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

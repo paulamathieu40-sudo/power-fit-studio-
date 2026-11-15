@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power Fit Studio - Planes</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #ffffff; display: flex; min-height: 100vh; }
+    .sidebar { width: 220px; background-color: #111111; padding: 20px 15px; border-right: 1px solid #222; position: fixed; height: 100vh; overflow-y: auto; }
+    .sidebar .logo { text-align: center; margin-bottom: 30px; }
+    .sidebar .logo h1 { font-size: 1.4rem; color: #ffffff; font-weight: 800; }
+    .sidebar .logo h1 span { color: #ff1493; display: block; font-size: 1.6rem; }
+    .sidebar nav a { display: flex; align-items: center; gap: 10px; padding: 12px 15px; color: #aaaaaa; text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 0.95rem; transition: all 0.3s; }
+    .sidebar nav a:hover { background-color: #1a1a1a; color: #ffffff; }
+    .sidebar nav a.active { background-color: #ff1493; color: #ffffff; font-weight: 600; }
+    .sidebar nav a .icon { font-size: 1.1rem; }
+    .main-content { margin-left: 220px; flex: 1; padding: 30px 40px; }
+    .main-content h2 { font-size: 1.5rem; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+    .planes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1000px; }
+    .plan-card { background: #161616; border: 2px solid #2a2a2a; border-radius: 16px; padding: 30px; text-align: center; transition: all 0.3s; }
+    .plan-card:hover { border-color: #ff1493; transform: translateY(-5px); }
+    .plan-card.destacado { border-color: #ff1493; background: linear-gradient(145deg, #161616, #1a0a14); }
+    .plan-card .badge-popular { display: inline-block; background: #ff1493; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-bottom: 10px; }
+    .plan-card h3 { font-size: 1.4rem; color: #ff1493; margin-bottom: 10px; }
+    .plan-card .precio { font-size: 2.5rem; font-weight: 800; margin: 15px 0; }
+    .plan-card .precio small { font-size: 1rem; color: #888; font-weight: 400; }
+    .plan-card .duracion { color: #aaa; margin-bottom: 20px; font-size: 0.9rem; }
+    .plan-card .features { list-style: none; text-align: left; margin-bottom: 25px; }
+    .plan-card .features li { padding: 8px 0; border-bottom: 1px solid #222; font-size: 0.9rem; color: #ccc; }
+    .plan-card .features li::before { content: '✓ '; color: #00c853; font-weight: 700; }
+    .plan-card .btn-plan { display: block; width: 100%; padding: 12px; background: #ff1493; color: #fff; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .plan-card .btn-plan:hover { background: #e0107e; }
+    @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 20px; } .planes-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo"><h1>POWER FIT <span>STUDIO</span></h1></div>
+    <nav>
+      <a href="inicio.html"><span class="icon">🏠</span> Inicio</a>
+      <a href="registro.html"><span class="icon">👤</span> Registro Clientes</a>
+      <a href="rutinas.html"><span class="icon">💪</span> Rutinas</a>
+      <a href="tienda.html"><span class="icon">🛍️</span> Tienda</a>
+      <a href="planes.html" class="active"><span class="icon">👑</span> Planes</a>
+      <a href="progreso.html"><span class="icon">📈</span> Progreso</a>
+      <a href="contacto.html"><span class="icon">✉️</span> Contacto</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <h2>👑 Nuestros Planes</h2>
+    <p style="color:#888; margin-bottom:30px;">Elegí el plan que mejor se adapte a tus objetivos</p>
+    <div class="planes-grid" id="planesGrid"></div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://kglgnogmbedvkoyrvmvk.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_JJhcTSJpTWSodyqVQXrwuA_jtf_0EmK';
+
+    async function cargarPlanes() {
+      try {
+        var res = await fetch(SUPABASE_URL + '/rest/v1/planes?order=id_plan', {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        var planes = await res.json();
+        var grid = document.getElementById('planesGrid');
+        grid.innerHTML = '';
+
+        var featuresPorPlan = {
+          1: ['Acceso a sala de musculación', 'Horario completo', 'Vestuarios y duchas'],
+          2: ['Todo lo del Plan Básico', 'Clases grupales incluidas', 'Rutina personalizada', 'Seguimiento mensual'],
+          3: ['Todo lo del Plan Premium', 'Entrenador personal', 'Plan nutricional', 'Acceso a todas las sedes', '10% descuento en tienda']
+        };
+
+        for (var i = 0; i < planes.length; i++) {
+          var p = planes[i];
+          var esDestacado = p.id_plan === 2;
+          var features = featuresPorPlan[p.id_plan] || [];
+          var featuresHTML = '';
+          for (var j = 0; j < features.length; j++) {
+            featuresHTML += '<li>' + features[j] + '</li>';
+          }
+
+          var card = document.createElement('div');
+          card.className = 'plan-card' + (esDestacado ? ' destacado' : '');
+          card.innerHTML =
+            (esDestacado ? '<span class="badge-popular">MÁS ELEGIDO</span>' : '') +
+            '<h3>' + p.nombre + '</h3>' +
+            '<div class="precio">$' + p.precio.toLocaleString() + ' <small>/ mes</small></div>' +
+            '<div class="duracion">Duración: ' + p.duracion_meses + ' mes' + (p.duracion_meses > 1 ? 'es' : '') + '</div>' +
+            '<p style="color:#aaa; font-size:0.85rem; margin-bottom:15px;">' + (p.descripcion || '') + '</p>' +
+            '<ul class="features">' + featuresHTML + '</ul>' +
+            '<button class="btn-plan" onclick="location.href=\'registro.html\'">Inscribirme</button>';
+          grid.appendChild(card);
+        }
+      } catch (e) {
+        console.error('Error cargando planes:', e);
+        document.getElementById('planesGrid').innerHTML = '<p style="color:#ff5252;">Error al cargar los planes</p>';
+      }
+    }
+
+    cargarPlanes();
+  </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power Fit Studio - Rutinas</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #ffffff; display: flex; min-height: 100vh; }
+    .sidebar { width: 220px; background-color: #111111; padding: 20px 15px; border-right: 1px solid #222; position: fixed; height: 100vh; overflow-y: auto; }
+    .sidebar .logo { text-align: center; margin-bottom: 30px; }
+    .sidebar .logo h1 { font-size: 1.4rem; color: #ffffff; font-weight: 800; }
+    .sidebar .logo h1 span { color: #ff1493; display: block; font-size: 1.6rem; }
+    .sidebar nav a { display: flex; align-items: center; gap: 10px; padding: 12px 15px; color: #aaaaaa; text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 0.95rem; transition: all 0.3s; }
+    .sidebar nav a:hover { background-color: #1a1a1a; color: #ffffff; }
+    .sidebar nav a.active { background-color: #ff1493; color: #ffffff; font-weight: 600; }
+    .sidebar nav a .icon { font-size: 1.1rem; }
+    .main-content { margin-left: 220px; flex: 1; padding: 30px 40px; }
+    .main-content h2 { font-size: 1.5rem; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+    .rutinas-list { max-width: 900px; }
+    .rutina-card { background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; padding: 25px; margin-bottom: 20px; transition: all 0.3s; }
+    .rutina-card:hover { border-color: #ff1493; }
+    .rutina-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+    .rutina-header h3 { color: #ff1493; font-size: 1.3rem; }
+    .rutina-meta { display: flex; gap: 10px; flex-wrap: wrap; }
+    .nivel-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .nivel-Principiante { background: rgba(0,200,83,0.15); color: #00c853; }
+    .nivel-Intermedio { background: rgba(255,193,7,0.15); color: #ffc107; }
+    .nivel-Avanzado { background: rgba(255,82,82,0.15); color: #ff5252; }
+    .nivel-Todos { background: rgba(79,195,247,0.15); color: #4fc3f7; }
+    .duracion-badge { background: #2a2a2a; color: #aaa; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; }
+    .rutina-desc { color: #aaa; margin-bottom: 20px; font-size: 0.95rem; }
+    .ejercicios-table { width: 100%; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; }
+    .ejercicios-table th { background: #252525; padding: 10px 14px; text-align: left; font-size: 0.8rem; color: #888; text-transform: uppercase; }
+    .ejercicios-table td { padding: 10px 14px; border-top: 1px solid #2a2a2a; font-size: 0.9rem; }
+    .ejercicios-table tbody tr:hover { background: #252525; }
+    .grupo-muscular-tag { display: inline-block; background: rgba(255,20,147,0.15); color: #ff1493; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; }
+    @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 20px; } }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo"><h1>POWER FIT <span>STUDIO</span></h1></div>
+    <nav>
+      <a href="inicio.html"><span class="icon">🏠</span> Inicio</a>
+      <a href="registro.html"><span class="icon">👤</span> Registro Clientes</a>
+      <a href="rutinas.html" class="active"><span class="icon">💪</span> Rutinas</a>
+      <a href="tienda.html"><span class="icon">🛍️</span> Tienda</a>
+      <a href="planes.html"><span class="icon">👑</span> Planes</a>
+      <a href="progreso.html"><span class="icon">📈</span> Progreso</a>
+      <a href="contacto.html"><span class="icon">✉️</span> Contacto</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <h2>💪 Rutinas de Entrenamiento</h2>
+    <p style="color:#888; margin-bottom:30px;">Rutinas diseñadas por nuestros entrenadores profesionales</p>
+    <div class="rutinas-list" id="rutinasList"></div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://kglgnogmbedvkoyrvmvk.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_JJhcTSJpTWSodyqVQXrwuA_jtf_0EmK';
+
+    async function cargarRutinas() {
+      try {
+        var res = await fetch(SUPABASE_URL + '/rest/v1/rutinas?order=id_rutina', {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        var rutinas = await res.json();
+        var list = document.getElementById('rutinasList');
+        list.innerHTML = '';
+
+        for (var i = 0; i < rutinas.length; i++) {
+          var r = rutinas[i];
+
+          var ejRes = await fetch(SUPABASE_URL + '/rest/v1/rutina_ejercicio?id_rutina=eq.' + r.id_rutina + '&order=orden', {
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+          });
+          var re = await ejRes.json();
+
+          var ejerciciosHTML = '';
+          if (re.length > 0) {
+            ejerciciosHTML = '<table class="ejercicios-table"><thead><tr><th>#</th><th>Ejercicio</th><th>Grupo Muscular</th><th>Series</th><th>Reps</th><th>Descanso</th></tr></thead><tbody>';
+            for (var j = 0; j < re.length; j++) {
+              var item = re[j];
+              var ejRes2 = await fetch(SUPABASE_URL + '/rest/v1/ejercicios?id_ejercicio=eq.' + item.id_ejercicio, {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+              });
+              var ejercicios = await ejRes2.json();
+              var ej = ejercicios[0] || { nombre: 'Ejercicio', grupo_muscular: '-' };
+
+              ejerciciosHTML += '<tr>' +
+                '<td>' + item.orden + '</td>' +
+                '<td><strong>' + ej.nombre + '</strong></td>' +
+                '<td><span class="grupo-muscular-tag">' + (ej.grupo_muscular || '-') + '</span></td>' +
+                '<td>' + (item.series || '-') + '</td>' +
+                '<td>' + (item.repeticiones || '-') + '</td>' +
+                '<td>' + (item.descanso_segundos ? item.descanso_segundos + 's' : '-') + '</td>' +
+                '</tr>';
+            }
+            ejerciciosHTML += '</tbody></table>';
+          } else {
+            ejerciciosHTML = '<p style="color:#888; font-style:italic;">Sin ejercicios asignados</p>';
+          }
+
+          var nivelClass = 'nivel-' + (r.nivel || 'Todos');
+          var card = document.createElement('div');
+          card.className = 'rutina-card';
+          card.innerHTML =
+            '<div class="rutina-header">' +
+              '<h3>' + r.nombre + '</h3>' +
+              '<div class="rutina-meta">' +
+                '<span class="nivel-badge ' + nivelClass + '">' + r.nivel + '</span>' +
+                '<span class="duracion-badge">📅 ' + r.duracion_semanas + ' semanas</span>' +
+              '</div>' +
+            '</div>' +
+            '<p class="rutina-desc">' + (r.descripcion || '') + '</p>' +
+            ejerciciosHTML;
+          list.appendChild(card);
+        }
+      } catch (e) {
+        console.error('Error cargando rutinas:', e);
+        document.getElementById('rutinasList').innerHTML = '<p style="color:#ff5252;">Error al cargar las rutinas</p>';
+      }
+    }
+
+    cargarRutinas();
+  </script>
+</body>
+</html>

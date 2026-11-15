@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power Fit Studio - Tienda</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0a0a0a; color: #ffffff; display: flex; min-height: 100vh; }
+    .sidebar { width: 220px; background-color: #111111; padding: 20px 15px; border-right: 1px solid #222; position: fixed; height: 100vh; overflow-y: auto; }
+    .sidebar .logo { text-align: center; margin-bottom: 30px; }
+    .sidebar .logo h1 { font-size: 1.4rem; color: #ffffff; font-weight: 800; }
+    .sidebar .logo h1 span { color: #ff1493; display: block; font-size: 1.6rem; }
+    .sidebar nav a { display: flex; align-items: center; gap: 10px; padding: 12px 15px; color: #aaaaaa; text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-size: 0.95rem; transition: all 0.3s; }
+    .sidebar nav a:hover { background-color: #1a1a1a; color: #ffffff; }
+    .sidebar nav a.active { background-color: #ff1493; color: #ffffff; font-weight: 600; }
+    .sidebar nav a .icon { font-size: 1.1rem; }
+    .main-content { margin-left: 220px; flex: 1; padding: 30px 40px; }
+    .main-content h2 { font-size: 1.5rem; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+    .filtros { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+    .filtro-btn { padding: 8px 18px; background: #1e1e1e; border: 1px solid #333; border-radius: 20px; color: #aaa; cursor: pointer; font-size: 0.9rem; transition: all 0.3s; }
+    .filtro-btn:hover, .filtro-btn.active { background: #ff1493; border-color: #ff1493; color: #fff; }
+    .productos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; max-width: 1100px; }
+    .producto-card { background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px; text-align: center; transition: all 0.3s; }
+    .producto-card:hover { border-color: #ff1493; transform: translateY(-3px); }
+    .producto-card .emoji { font-size: 3rem; margin-bottom: 10px; }
+    .producto-card .categoria { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+    .producto-card h4 { font-size: 1.05rem; margin-bottom: 8px; }
+    .producto-card .precio { color: #ff1493; font-size: 1.4rem; font-weight: 700; margin-bottom: 5px; }
+    .producto-card .stock { font-size: 0.8rem; color: #888; margin-bottom: 15px; }
+    .producto-card .stock.bajo { color: #ff5252; }
+    .producto-card .qty-control { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; }
+    .producto-card .qty-control button { width: 30px; height: 30px; border: 1px solid #444; background: #2a2a2a; color: #fff; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .producto-card .qty-control button:hover { background: #ff1493; }
+    .producto-card .qty-control span { font-weight: 700; min-width: 20px; }
+    .producto-card .btn-agregar { width: 100%; padding: 10px; background: #ff1493; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .producto-card .btn-agregar:hover { background: #e0107e; }
+    .producto-card .btn-agregar:disabled { background: #333; cursor: not-allowed; }
+    .carrito-flotante { position: fixed; bottom: 30px; right: 30px; background: #ff1493; color: #fff; padding: 15px 25px; border-radius: 50px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 20px rgba(255,20,147,0.4); transition: all 0.3s; z-index: 100; display: none; }
+    .carrito-flotante.visible { display: block; }
+    .carrito-flotante:hover { transform: translateY(-3px); }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 999; justify-content: center; align-items: center; }
+    .modal-overlay.show { display: flex; }
+    .modal-content { background: #161616; border: 1px solid #2a2a2a; border-radius: 16px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+    .modal-content h3 { color: #ff1493; margin-bottom: 20px; }
+    .modal-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2a2a2a; }
+    .modal-total { display: flex; justify-content: space-between; padding-top: 15px; font-size: 1.2rem; font-weight: 700; color: #ff1493; }
+    .modal-content .btn { padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 15px; width: 100%; }
+    .btn-primary { background: #ff1493; color: #fff; }
+    .btn-secondary { background: #333; color: #fff; margin-top: 10px; }
+    .toast { position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 8px; color: #fff; font-weight: 500; z-index: 1000; transform: translateX(400px); transition: transform 0.4s ease; }
+    .toast.show { transform: translateX(0); }
+    .toast.success { background-color: #00c853; }
+    .toast.error { background-color: #ff5252; }
+    .sin-productos { text-align: center; padding: 60px 20px; color: #888; grid-column: 1 / -1; }
+    .sin-productos .icon { font-size: 4rem; margin-bottom: 15px; }
+    @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; padding: 20px; } }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo"><h1>POWER FIT <span>STUDIO</span></h1></div>
+    <nav>
+      <a href="inicio.html"><span class="icon">🏠</span> Inicio</a>
+      <a href="registro.html"><span class="icon">👤</span> Registro Clientes</a>
+      <a href="rutinas.html"><span class="icon">💪</span> Rutinas</a>
+      <a href="tienda.html" class="active"><span class="icon">🛍️</span> Tienda</a>
+      <a href="planes.html"><span class="icon">👑</span> Planes</a>
+      <a href="progreso.html"><span class="icon">📈</span> Progreso</a>
+      <a href="contacto.html"><span class="icon">✉️</span> Contacto</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <h2>🛍️ Tienda de Indumentaria</h2>
+    <div class="filtros">
+      <button class="filtro-btn active" onclick="filtrar('todos', this)">Todos</button>
+      <button class="filtro-btn" onclick="filtrar('Indumentaria', this)">Indumentaria</button>
+      <button class="filtro-btn" onclick="filtrar('Accesorios', this)">Accesorios</button>
+    </div>
+    <div class="productos-grid" id="productosGrid">
+      <div class="sin-productos"><div class="icon">⏳</div><p>Cargando productos...</p></div>
+    </div>
+  </main>
+
+  <div class="carrito-flotante" id="carritoBtn" onclick="abrirCarrito()">🛒 Carrito (<span id="carritoCount">0</span>)</div>
+
+  <div class="modal-overlay" id="modalCarrito">
+    <div class="modal-content">
+      <h3>🛒 Tu Carrito</h3>
+      <div id="carritoItems"></div>
+      <div class="modal-total"><span>Total:</span><span id="carritoTotal">$0</span></div>
+      <button class="btn btn-primary" onclick="finalizarCompra()">✅ Finalizar Compra</button>
+      <button class="btn btn-secondary" onclick="cerrarCarrito()">Seguir comprando</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const SUPABASE_URL = 'https://kglgnogmbedvkoyrvmvk.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_JJhcTSJpTWSodyqVQXrwuA_jtf_0EmK';
+
+    let productosData = [];
+    let carrito = {};
+    let filtroActual = 'todos';
+
+    // Emojis según nombre del producto
+    function getEmoji(nombre, categoria) {
+      var n = (nombre || '').toLowerCase();
+      if (n.indexOf('remera') !== -1 || n.indexOf('buzo') !== -1 || n.indexOf('top') !== -1 || n.indexOf('pantal') !== -1) return '👕';
+      if (n.indexOf('short') !== -1) return '🩳';
+      if (n.indexOf('zapatilla') !== -1 || n.indexOf('calzado') !== -1) return '👟';
+      if (n.indexOf('mochila') !== -1 || n.indexOf('bolso') !== -1) return '🎒';
+      if (n.indexOf('botella') !== -1 || n.indexOf('térmica') !== -1 || n.indexOf('termica') !== -1) return '🥤';
+      if (n.indexOf('guante') !== -1) return '🧤';
+      if (n.indexOf('toalla') !== -1) return '🧺';
+      if (n.indexOf('soga') !== -1 || n.indexOf('cuerda') !== -1) return '🪢';
+      return categoria === 'Accesorios' ? '🎒' : '👕';
+    }
+
+    // Inferir categoría si no existe (por si la columna está vacía)
+    function inferirCategoria(p) {
+      if (p.categoria) return p.categoria;
+      var n = (p.nombre || '').toLowerCase();
+      if (n.indexOf('botella') !== -1 || n.indexOf('mochila') !== -1 || n.indexOf('guante') !== -1 || n.indexOf('toalla') !== -1 || n.indexOf('soga') !== -1) return 'Accesorios';
+      return 'Indumentaria';
+    }
+
+    function showToast(msg, type) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast ' + (type || 'success') + ' show';
+      setTimeout(function() { t.classList.remove('show'); }, 3000);
+    }
+
+    async function cargarProductos() {
+      try {
+        var res = await fetch(SUPABASE_URL + '/rest/v1/productos?order=id_producto', {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        productosData = await res.json();
+        // Normalizar: si no tiene categoria, la inferimos
+        for (var i = 0; i < productosData.length; i++) {
+          productosData[i].categoria = inferirCategoria(productosData[i]);
+        }
+        console.log('Productos cargados:', productosData.length);
+      } catch (e) {
+        console.error('Error cargando productos:', e);
+        productosData = [];
+      }
+      renderProductos();
+    }
+
+    function renderProductos() {
+      var grid = document.getElementById('productosGrid');
+      grid.innerHTML = '';
+
+      var filtrados = filtroActual === 'todos' ? productosData : productosData.filter(function(p) { return p.categoria === filtroActual; });
+
+      if (filtrados.length === 0) {
+        grid.innerHTML = '<div class="sin-productos"><div class="icon">📦</div><p>No hay productos en esta categoría</p></div>';
+        return;
+      }
+
+      for (var i = 0; i < filtrados.length; i++) {
+        var p = filtrados[i];
+        var qty = carrito[p.id_producto] || 0;
+        var stockBajo = p.stock < 10;
+
+        var card = document.createElement('div');
+        card.className = 'producto-card';
+        card.innerHTML =
+          '<div class="emoji">' + getEmoji(p.nombre, p.categoria) + '</div>' +
+          '<div class="categoria">' + p.categoria + '</div>' +
+          '<h4>' + p.nombre + '</h4>' +
+          '<div class="precio">$' + p.precio.toLocaleString() + '</div>' +
+          '<div class="stock ' + (stockBajo ? 'bajo' : '') + '">' + (stockBajo ? '⚠️ ' : '') + 'Stock: ' + p.stock + ' | Talle: ' + (p.talle || 'Único') + '</div>' +
+          '<div class="qty-control">' +
+            '<button onclick="cambiarQty(' + p.id_producto + ', -1)">−</button>' +
+            '<span id="qty-' + p.id_producto + '">' + qty + '</span>' +
+            '<button onclick="cambiarQty(' + p.id_producto + ', 1)">+</button>' +
+          '</div>' +
+          '<button class="btn-agregar" onclick="agregarCarrito(' + p.id_producto + ')" ' + (qty === 0 ? 'disabled' : '') + '>Agregar al carrito</button>';
+        grid.appendChild(card);
+      }
+    }
+
+    function cambiarQty(id, delta) {
+      var p = null;
+      for (var i = 0; i < productosData.length; i++) {
+        if (productosData[i].id_producto === id) { p = productosData[i]; break; }
+      }
+      if (!p) return;
+      var current = carrito[id] || 0;
+      var newQty = Math.max(0, Math.min(current + delta, p.stock));
+      if (newQty === 0) delete carrito[id];
+      else carrito[id] = newQty;
+      var span = document.getElementById('qty-' + id);
+      if (span) span.textContent = newQty;
+      actualizarCarrito();
+      renderProductos();
+    }
+
+    function agregarCarrito(id) {
+      if (!carrito[id] || carrito[id] === 0) {
+        showToast('⚠️ Seleccioná una cantidad', 'error');
+        return;
+      }
+      showToast('✅ Producto agregado al carrito');
+      abrirCarrito();
+    }
+
+    function actualizarCarrito() {
+      var count = 0;
+      var entries = Object.entries(carrito);
+      for (var i = 0; i < entries.length; i++) count += entries[i][1];
+      document.getElementById('carritoCount').textContent = count;
+      var btn = document.getElementById('carritoBtn');
+      if (count > 0) btn.classList.add('visible');
+      else btn.classList.remove('visible');
+    }
+
+    function abrirCarrito() {
+      var entries = Object.entries(carrito);
+      if (entries.length === 0) { showToast('🛒 El carrito está vacío', 'error'); return; }
+      var itemsDiv = document.getElementById('carritoItems');
+      itemsDiv.innerHTML = '';
+      var total = 0;
+      for (var i = 0; i < entries.length; i++) {
+        var id = parseInt(entries[i][0]);
+        var qty = entries[i][1];
+        var p = null;
+        for (var j = 0; j < productosData.length; j++) {
+          if (productosData[j].id_producto === id) { p = productosData[j]; break; }
+        }
+        if (!p) continue;
+        var subtotal = p.precio * qty;
+        total += subtotal;
+        itemsDiv.innerHTML += '<div class="modal-item"><span>' + p.nombre + ' x' + qty + '</span><span>$' + subtotal.toLocaleString() + '</span></div>';
+      }
+      document.getElementById('carritoTotal').textContent = '$' + total.toLocaleString();
+      document.getElementById('modalCarrito').classList.add('show');
+    }
+
+    function cerrarCarrito() {
+      document.getElementById('modalCarrito').classList.remove('show');
+    }
+
+    async function finalizarCompra() {
+      var dni = prompt('Ingresá el DNI del cliente para registrar la venta:');
+      if (!dni) return;
+
+      try {
+        var clienteRes = await fetch(SUPABASE_URL + '/rest/v1/clientes?dni=eq.' + dni, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+        });
+        var clientes = await clienteRes.json();
+        if (clientes.length === 0) {
+          showToast('❌ No se encontró un cliente con ese DNI', 'error');
+          return;
+        }
+        var idCliente = clientes[0].id_cliente;
+
+        var total = 0;
+        var detalles = [];
+        var entries = Object.entries(carrito);
+        for (var i = 0; i < entries.length; i++) {
+          var id = parseInt(entries[i][0]);
+          var qty = entries[i][1];
+          var p = null;
+          for (var j = 0; j < productosData.length; j++) {
+            if (productosData[j].id_producto === id) { p = productosData[j]; break; }
+          }
+          if (!p) continue;
+          var subtotal = p.precio * qty;
+          total += subtotal;
+          detalles.push({ id_producto: id, cantidad: qty, precio_unitario: p.precio, subtotal: subtotal });
+        }
+
+        var ventaRes = await fetch(SUPABASE_URL + '/rest/v1/ventas', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+          body: JSON.stringify({ id_cliente: idCliente, fecha_venta: new Date().toISOString().split('T')[0], total: total, metodo_pago: 'Efectivo', estado: 'COMPLETADA' })
+        });
+        var venta = await ventaRes.json();
+        var idVenta = Array.isArray(venta) ? venta[0].id_venta : venta.id_venta;
+
+        for (var i = 0; i < detalles.length; i++) {
+          await fetch(SUPABASE_URL + '/rest/v1/detalle_venta', {
+            method: 'POST',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_venta: idVenta, id_producto: detalles[i].id_producto, cantidad: detalles[i].cantidad, precio_unitario: detalles[i].precio_unitario, subtotal: detalles[i].subtotal })
+          });
+        }
+
+        showToast('✅ Compra registrada exitosamente');
+        carrito = {};
+        actualizarCarrito();
+        renderProductos();
+        cerrarCarrito();
+      } catch (e) {
+        console.error(e);
+        showToast('❌ Error al registrar la compra', 'error');
+      }
+    }
+
+    function filtrar(categoria, btn) {
+      filtroActual = categoria;
+      var btns = document.querySelectorAll('.filtro-btn');
+      for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+      btn.classList.add('active');
+      renderProductos();
+    }
+
+    cargarProductos();
+  </script>
+</body>
+</htmL>
